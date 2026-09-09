@@ -1,0 +1,237 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          String    @default("CITIZEN") // STARTUP, GOV_OFFICER, GOV_ADMIN, CITIZEN, PLATFORM_ADMIN
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  startupProfile     StartupProfile?
+  department         Department?     @relation(fields: [departmentId], references: [id])
+  departmentId       String?
+  authoredProblems   Problem[]
+  auditLogs          AuditLog[]
+}
+
+model StartupProfile {
+  id               String           @id @default(cuid())
+  userId           String           @unique
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName      String
+  cinNumber        String?
+  dpiitNumber      String?
+  sector           String?
+  foundedYear      Int?
+  description      String?
+  website          String?
+  eligibilityScore Int              @default(0)
+  verificationStatus String         @default("PENDING") // PENDING, NEEDS_REVIEW, VERIFIED, REJECTED
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  documents        Document[]
+  pitches          Pitch[]
+  passports        SolutionPassport[]
+}
+
+model Document {
+  id               String         @id @default(cuid())
+  startupId        String
+  startup          StartupProfile @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  type             String         // INCORPORATION, PAN, DPIIT, GST, FINANCIALS, OTHER
+  url              String
+  extractedFields  String?
+  aiVerdict        String?
+  aiConfidence     Float?
+  reviewedByAdmin  Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String
+  state       String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users              User[]
+  problems           Problem[]
+  pilots             Pilot[]
+  marketplaceRequests MarketplaceRequest[]
+}
+
+model Problem {
+  id          String         @id @default(cuid())
+  title       String
+  description String
+  theme       String?
+  deadline    DateTime?
+  budgetBand  String?
+  expectedOutcomes String?
+  status      String         @default("DRAFT") // DRAFT, PUBLISHED, CLOSED, ARCHIVED
+  sourceType  String         @default("OFFICIAL") // OFFICIAL, COMMUNITY
+
+  departmentId String
+  department   Department    @relation(fields: [departmentId], references: [id])
+  authorId     String
+  author       User          @relation(fields: [authorId], references: [id])
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  pitches     Pitch[]
+}
+
+model Pitch {
+  id              String         @id @default(cuid())
+  problemId       String
+  problem         Problem        @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  startupId       String
+  startup         StartupProfile @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  solutionSummary String
+  techReadinessLevel Int         @default(1)
+  team            String?
+  supportingUrl   String?
+  status          String         @default("SUBMITTED") // SUBMITTED, SHORTLISTED, SELECTED, REJECTED
+  aiSummary       String?
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  pilot           Pilot?
+}
+
+model Pilot {
+  id              String         @id @default(cuid())
+  pitchId         String         @unique
+  pitch           Pitch          @relation(fields: [pitchId], references: [id])
+  departmentId    String
+  department      Department     @relation(fields: [departmentId], references: [id])
+
+  status          String         @default("DRAFT") // DRAFT, IN_PROGRESS, COMPLETED, CANCELLED
+  budget          Float?
+  measuredBenefit Float?
+  startDate       DateTime?
+  endDate         DateTime?
+
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  kpis            KPI[]
+  legalDocuments  LegalDocument[]
+  passport        SolutionPassport?
+}
+
+model KPI {
+  id          String       @id @default(cuid())
+  pilotId     String
+  pilot       Pilot        @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+  metric      String
+  target      Float
+  unit        String
+  weight      Float        @default(1.0)
+  direction   String       @default("HIGHER_IS_BETTER") // HIGHER_IS_BETTER, LOWER_IS_BETTER
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  results     KPIResult[]
+}
+
+model KPIResult {
+  id          String   @id @default(cuid())
+  kpiId       String
+  kpi         KPI      @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  actual      Float
+  evidence    String?
+  attachmentUrl String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LegalDocument {
+  id        String   @id @default(cuid())
+  pilotId   String
+  pilot     Pilot    @relation(fields: [pilotId], references: [id], onDelete: Cascade)
+  docType   String
+  content   String
+  fileUrl   String?
+  isSigned  Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SolutionPassport {
+  id          String            @id @default(cuid())
+  pilotId     String            @unique
+  pilot       Pilot             @relation(fields: [pilotId], references: [id])
+  startupId   String
+  startup     StartupProfile    @relation(fields: [startupId], references: [id])
+
+  title       String
+  summary     String
+  impactScore Float             @default(0)
+  trustBadge  String            @default("YELLOW") // GREEN, YELLOW, RED
+  roiPercent  Float?
+  ipStatus    String            @default("PROPRIETARY") // PROPRIETARY, OPEN
+  isPublished Boolean           @default(true)
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  marketplaceRequests MarketplaceRequest[]
+}
+
+model MarketplaceRequest {
+  id           String           @id @default(cuid())
+  passportId   String
+  passport     SolutionPassport @relation(fields: [passportId], references: [id])
+  departmentId String
+  department   Department       @relation(fields: [departmentId], references: [id])
+  status       String           @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  notes        String?
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model UnregisteredProblem {
+  id          String             @id @default(cuid())
+  title       String
+  description String
+  location    String?
+  reporter    String?
+  status      String             @default("PENDING") // PENDING, ADOPTED, REJECTED
+
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  entityType  String
+  entityId    String
+  actorId     String
+  actor       User     @relation(fields: [actorId], references: [id])
+  details     String?
+
+  createdAt   DateTime @default(now())
+}
