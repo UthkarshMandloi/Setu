@@ -30,9 +30,10 @@ export default async function ProblemDetailPage({ params }: { params: { id: stri
       where: { userId: (session.user as any).id }
     });
     if (profile) {
-      existingPitch = await prisma.pitch.findUnique({
+      existingPitch = await prisma.pitch.findFirst({
         where: {
-          problemId_startupId: { problemId: problem.id, startupId: profile.id }
+          problemId: problem.id,
+          startupId: profile.id
         }
       });
     }

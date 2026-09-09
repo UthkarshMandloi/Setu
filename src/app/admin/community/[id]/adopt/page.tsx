@@ -64,7 +64,7 @@ export default async function AdoptProblemPage({ params }: { params: { id: strin
         title={report.title}
         description={report.description}
         departments={departments}
-        userDepartmentId={user?.departmentId}
+        userDepartmentId={user?.departmentId || undefined}
       />
     </div>
   );

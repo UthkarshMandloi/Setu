@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { selectPitch, rejectPitch } from "./actions";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function PitchActions({ pitchId, problemId }: { pitchId: string; problemId: string }) {
   const [loading, setLoading] = useState(false);

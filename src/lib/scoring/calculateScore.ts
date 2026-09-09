@@ -24,10 +24,10 @@ export async function calculatePilotScore(pilotId: string): Promise<number> {
   let maxPossibleScore = 0;
 
   for (const kpi of pilot.kpis) {
-    const result = pilot.results?.find(r => r.kpiId === kpi.id);
+    const result = (kpi as any).results ? (kpi as any).results[0] : undefined;
     if (!result) continue;
 
-    const actualValue = result.actual;
+    const actualValue = (result as any).actual;
     const targetValue = kpi.target;
     const direction = kpi.direction; // "HIGHER_IS_BETTER" or "LOWER_IS_BETTER"
     const weight = kpi.weight || 1.0;

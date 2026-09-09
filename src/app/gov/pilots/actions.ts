@@ -42,7 +42,7 @@ export async function calculateMetrics(pilotId: string) {
     hasPassport: !!pilot.passport,
     passport: pilot.passport,
     kpis: pilot.kpis?.map(kpi => {
-      const result = pilot.results?.find(r => r.kpiId === kpi.id);
+      const result = (kpi as any).results ? (kpi as any).results[0] : undefined;
       return {
         id: kpi.id,
         metric: kpi.metric,
