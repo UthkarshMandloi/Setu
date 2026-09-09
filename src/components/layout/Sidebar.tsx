@@ -10,6 +10,7 @@ export function Sidebar({ role }: { role?: string }) {
       { name: 'Find Problems', path: '/problems' },
       { name: 'My Pitches', path: '/startup/pitches' },
       { name: 'Active Pilots', path: '/startup/pilots' },
+      { name: 'Notifications', path: '/notifications' },
     ],
     GOV_OFFICER: [
       { name: 'Dashboard', path: '/gov' },
@@ -18,15 +19,19 @@ export function Sidebar({ role }: { role?: string }) {
       { name: 'Review Pitches', path: '/gov/pitches' },
       { name: 'Active Pilots', path: '/gov/pilots' },
       { name: 'Marketplace', path: '/marketplace' },
+      { name: 'Notifications', path: '/notifications' },
     ],
     GOV_ADMIN: [
       { name: 'Dashboard', path: '/admin' },
       { name: 'Startup Verification', path: '/admin/verify' },
-      { name: 'Community Reports', path: '/admin/reports' },
+      { name: 'Community Reports', path: '/admin/community' },
+      { name: 'Audit Log', path: '/admin/audit-log' },
+      { name: 'Notifications', path: '/notifications' },
     ],
     PLATFORM_ADMIN: [
       { name: 'Overview', path: '/admin' },
-      { name: 'Audit Logs', path: '/admin/audit' },
+      { name: 'Audit Log', path: '/admin/audit-log' },
+      { name: 'Notifications', path: '/notifications' },
     ],
     CITIZEN: [
       { name: 'Report Problem', path: '/report-problem' },

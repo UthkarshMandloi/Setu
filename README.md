@@ -6,14 +6,14 @@ Government-Startup Innovation Procurement Exchange prototype. Government departm
 
 | Module | Status | What works |
 |---|---|---|
-| Auth + Layout Shell | ✅ | Standard login (`email` + `password123`) + simulated DigiLocker mock login; role-based routing (`STARTUP`, `GOV_OFFICER`, `GOV_ADMIN`, `PLATFORM_ADMIN`, `CITIZEN`); government portal navbar/sidebar |
-| Startup Verification | ✅ | Document upload (`public/uploads`), AI extraction (simulated with Gemini mock fallback), eligibility scoring (20% incorporation, 25% DPIIT, 15% PAN, 15% GST, 15% financials, 10% conflicts) |
-| Problems + Pitching | ✅ | Officer creates problems; startups submit pitches; officer selects/rejects; audit log recorded |
-| Pilot + KPIs + Legal Assistant | ✅ | Officer creates pilots on selection; KPI definitions; AI legal draft assistant (`Pilot Agreement`, `NDA`, `MoU`, `Data-Sharing`, `IP Licensing`); `.docx` export via `docx` package; simulated badges shown |
-| Scoring + Solution Passport | ✅ | `calculateScore.ts`: KPI achievement % (respect `direction`: `HIGHER_IS_BETTER` / `LOWER_IS_BETTER`), ROI `((measuredBenefit - budget) / budget) * 100`, trust badge (`GREEN` ≥80, `YELLOW` 50-79, `RED` <50), `SolutionPassport` creation |
-| Marketplace + Reuse | ⚠️ Partial | `SolutionPassport` table + `MarketplaceRequest` exist; `/marketplace` page not fully wired; open/proprietary IP fields in schema |
-| Community Problem Reporting | ⚠️ Partial | `UnregisteredProblem` table + seed data; public report form + admin "Adopt into Registry" action not fully wired |
-| Notifications + Audit Log | ⚠️ Partial | `AuditLog` table exists; audit entries created on pitch selection/rejection; in-app notification list not fully wired |
+| Auth + Layout Shell | ✅ Complete | Standard login (`email` + `password123`) + simulated DigiLocker mock login; role-based routing (`STARTUP`, `GOV_OFFICER`, `GOV_ADMIN`, `PLATFORM_ADMIN`, `CITIZEN`); government portal navbar/sidebar |
+| Startup Verification | ✅ Complete | Document upload (`public/uploads`), AI extraction (simulated with Gemini mock fallback), eligibility scoring (20% incorporation, 25% DPIIT, 15% PAN, 15% GST, 15% financials, 10% conflicts) |
+| Problems + Pitching | ✅ Complete | Officer creates problems; startups submit pitches; officer selects/rejects; audit log recorded |
+| Pilot + KPIs + Legal Assistant | ✅ Complete | Officer creates pilots on selection; KPI definitions; AI legal draft assistant (`Pilot Agreement`, `NDA`, `MoU`, `Data-Sharing`, `IP Licensing`); `.docx` export via `docx` package; simulated badges shown |
+| Scoring + Solution Passport | ✅ Complete | `calculateScore.ts`: KPI achievement % (respect `direction`: `HIGHER_IS_BETTER` / `LOWER_IS_BETTER`), ROI `((measuredBenefit - budget) / budget) * 100`, trust badge (`GREEN` ≥80, `YELLOW` 50-79, `RED` <50), `SolutionPassport` creation |
+| Marketplace + Reuse | ✅ Complete | Browse passports at `/marketplace`; view details; "Request Assignment" from second department; open/proprietary IP status; marketplace request workflow |
+| Community Problem Reporting | ✅ Complete | Public form at `/report-problem`; admin moderation queue at `/admin/community`; "Adopt into Registry" action creates official Problem with `sourceType: COMMUNITY` |
+| Notifications + Audit Log | ✅ Complete | In-app notifications at `/notifications`; mark all read; audit log at `/admin/audit-log` with full action history; `Notification` model with type-based styling |
 
 ## Tech stack
 
@@ -63,12 +63,11 @@ App runs at `http://localhost:3000`.
 
 ## What is remaining / not fully wired
 
-- **Marketplace page** (`/marketplace`) — browse passports, request assignment from second department, Open-IP assignment to similar startup
-- **Community reporting UI** (`/report-problem`) — public form for unregistered problems; admin "Adopt into Registry" moderation queue
-- **In-app notifications** — list page and real-time updates
-- **Full `.docx` export integration** — draft generation works via `docx`; download endpoint can be added
-- **Pitch summarisation** — optional Gemini-based short summary alongside pitch text (do last if time allows)
-- **Recharts visualisation** — full KPI-vs-actual chart rendering on pilot pages
+- **Gemini AI integration** — mock fallback works; wire real `GEMINI_API_KEY` for production document extraction and legal drafting
+- **`.docx` download endpoint** — add route to serve generated documents
+- **Recharts visualisation** — full KPI-vs-actual chart rendering on pilot detail pages
+- **Pitch summarisation** — optional Gemini-based short summary alongside pitch text
+- **File upload storage** — currently local `/uploads`; wire cloud storage for production
 
 ## File structure highlights
 

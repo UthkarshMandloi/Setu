@@ -23,6 +23,7 @@ model User {
   departmentId       String?
   authoredProblems   Problem[]
   auditLogs          AuditLog[]
+  notifications      Notification[]
 }
 
 model StartupProfile {
@@ -222,6 +223,19 @@ model UnregisteredProblem {
 
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  message     String
+  type        String   // INFO, SUCCESS, WARNING, ERROR
+  isRead      Boolean  @default(false)
+  link        String?  // Optional link to relevant entity
+
+  createdAt   DateTime @default(now())
 }
 
 model AuditLog {
