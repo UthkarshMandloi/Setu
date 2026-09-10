@@ -1,8 +1,6 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function calculatePilotScore(pilotId: string): Promise<number> {
   const pilot = await prisma.pilot.findUnique({

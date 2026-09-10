@@ -1,10 +1,10 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import ReviewForm from "./ReviewForm";
 
-const prisma = new PrismaClient();
+
 
 export default async function StartupReviewPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

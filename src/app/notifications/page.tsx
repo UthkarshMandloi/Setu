@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Bell, CheckCircle, AlertCircle, Info, XCircle } from "lucide-react";
 import MarkReadForm from "./MarkReadForm";
 
-const prisma = new PrismaClient();
+
 
 export default async function NotificationsPage() {
   const session = await getServerSession(authOptions);

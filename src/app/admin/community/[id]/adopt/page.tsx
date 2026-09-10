@@ -1,12 +1,12 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AdoptForm from "./AdoptForm";
 
-const prisma = new PrismaClient();
+
 
 export default async function AdoptProblemPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);

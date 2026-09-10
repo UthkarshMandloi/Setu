@@ -1,13 +1,13 @@
 "use server";
 
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { verifyDocument } from "@/lib/ai/verifyDocument";
 import { calculateEligibilityScore } from "@/lib/scoring/eligibility";
 import { revalidatePath } from "next/cache";
 
-const prisma = new PrismaClient();
+
 
 export async function updateProfile(formData: FormData) {
   const session = await getServerSession(authOptions);
