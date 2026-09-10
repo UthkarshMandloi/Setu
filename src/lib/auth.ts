@@ -106,11 +106,22 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      let effectiveBase = baseUrl;
+      if (process.env.VERCEL_URL && (effectiveBase.includes("localhost") || !effectiveBase)) {
+        effectiveBase = `https://${process.env.VERCEL_URL}`;
+      }
+      if (process.env.NEXTAUTH_URL && !process.env.NEXTAUTH_URL.includes("localhost")) {
+        effectiveBase = process.env.NEXTAUTH_URL;
+      }
+
+      if (url.startsWith("/")) return `${effectiveBase}${url}`;
       try {
-        if (new URL(url).origin === baseUrl) return url;
+        const parsed = new URL(url);
+        if (parsed.origin === effectiveBase || parsed.hostname.endsWith(".vercel.app")) {
+          return url;
+        }
       } catch (e) {}
-      return `${baseUrl}/login`;
+      return `${effectiveBase}/login`;
     }
   },
   pages: {

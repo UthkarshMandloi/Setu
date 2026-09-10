@@ -4,6 +4,15 @@ import Link from 'next/link';
 import { signOut } from 'next-auth/react';
 
 export function Navbar({ user }: { user: any }) {
+  const handleSignOut = async () => {
+    try {
+      await signOut({ redirect: false });
+    } catch (e) {
+      console.error("Signout error:", e);
+    }
+    window.location.href = "/login";
+  };
+
   return (
     <header className="bg-[#1B3A6B] text-white py-4 px-6 shadow-md flex justify-between items-center z-10 sticky top-0">
       <div className="flex items-center gap-4">
@@ -25,7 +34,7 @@ export function Navbar({ user }: { user: any }) {
               <p className="text-xs text-[#D97706]">{user.role?.replace('_', ' ')}</p>
             </div>
             <button
-              onClick={() => signOut({ callbackUrl: '/login' })}
+              onClick={handleSignOut}
               className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded transition cursor-pointer"
             >
               Sign out
