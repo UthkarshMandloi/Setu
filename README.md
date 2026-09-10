@@ -35,7 +35,7 @@ cp .env.example .env   # or create .env manually
 ```
 `.env` contents:
 ```env
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="file:./prisma/dev.db"
 GEMINI_API_KEY="<your-key-or-leave-empty-for-mock>"
 NEXTAUTH_SECRET="<random-string>"
 NEXTAUTH_URL="http://localhost:3000"
@@ -65,7 +65,7 @@ App runs at `http://localhost:3000`.
 
 The repository includes `vercel.json` configured for instant Vercel deployment:
 1. Import the repository in [Vercel](https://vercel.com/new).
-2. Set Environment Variables (`DATABASE_URL="file:./dev.db"`, `NEXTAUTH_SECRET="<your-secret>"`, `NEXTAUTH_URL="https://<your-app>.vercel.app"`).
+2. Set Environment Variables (`DATABASE_URL="file:./prisma/dev.db"`, `NEXTAUTH_SECRET="<your-secret>"`, `NEXTAUTH_URL="https://<your-app>.vercel.app"`).
 3. Click **Deploy**. Vercel will automatically build the Next.js app and populate the database seed.
 
 ## What is remaining / not fully wired
