@@ -1,4 +1,7 @@
+"use client";
+
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 
 export function Navbar({ user }: { user: any }) {
   return (
@@ -19,11 +22,14 @@ export function Navbar({ user }: { user: any }) {
           <>
             <div className="text-sm text-right mr-4">
               <p className="font-semibold">{user.name}</p>
-              <p className="text-xs text-[#D97706]">{user.role.replace('_', ' ')}</p>
+              <p className="text-xs text-[#D97706]">{user.role?.replace('_', ' ')}</p>
             </div>
-            <Link href="/api/auth/signout" className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded transition">
+            <button
+              onClick={() => signOut({ callbackUrl: '/login' })}
+              className="text-sm bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded transition cursor-pointer"
+            >
               Sign out
-            </Link>
+            </button>
           </>
         ) : (
           <Link href="/login" className="text-sm bg-[#D97706] hover:bg-[#b56305] px-4 py-2 rounded font-medium text-white transition">

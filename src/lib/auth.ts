@@ -104,6 +104,13 @@ export const authOptions: NextAuthOptions = {
         if (token.photoUrl) (session.user as any).photoUrl = token.photoUrl;
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      try {
+        if (new URL(url).origin === baseUrl) return url;
+      } catch (e) {}
+      return `${baseUrl}/login`;
     }
   },
   pages: {
