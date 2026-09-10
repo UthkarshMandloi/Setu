@@ -61,6 +61,13 @@ App runs at `http://localhost:3000`.
 
 5. **DigiLocker mock login** — click the DigiLocker tab on `/login`; returns a simulated verified identity with a "Simulated for demo" badge.
 
+## Deployment (Vercel)
+
+The repository includes `vercel.json` configured for instant Vercel deployment:
+1. Import the repository in [Vercel](https://vercel.com/new).
+2. Set Environment Variables (`DATABASE_URL="file:./dev.db"`, `NEXTAUTH_SECRET="<your-secret>"`, `NEXTAUTH_URL="https://<your-app>.vercel.app"`).
+3. Click **Deploy**. Vercel will automatically build the Next.js app and populate the database seed.
+
 ## What is remaining / not fully wired
 
 - **Gemini AI integration** — mock fallback works; wire real `GEMINI_API_KEY` for production document extraction and legal drafting
