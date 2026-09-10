@@ -8,10 +8,10 @@ export default async function LoginPage() {
   
   if (session?.user) {
     const role = (session.user as any).role;
-    if (role === 'STARTUP') redirect('/startup');
-    if (role === 'GOV_OFFICER') redirect('/gov');
-    if (role === 'GOV_ADMIN') redirect('/admin');
-    if (role === 'PLATFORM_ADMIN') redirect('/admin');
+    if (role === 'STARTUP') redirect('/startup/profile');
+    if (role === 'GOV_OFFICER') redirect('/gov/problems');
+    if (role === 'GOV_ADMIN') redirect('/admin/verify');
+    if (role === 'PLATFORM_ADMIN') redirect('/admin/audit-log');
     redirect('/report-problem');
   }
 

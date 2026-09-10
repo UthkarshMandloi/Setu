@@ -5,7 +5,7 @@ export function Sidebar({ role }: { role?: string }) {
 
   const links = {
     STARTUP: [
-      { name: 'Dashboard', path: '/startup' },
+      { name: 'Dashboard', path: '/startup/profile' },
       { name: 'My Profile', path: '/startup/profile' },
       { name: 'Find Problems', path: '/problems' },
       { name: 'My Pitches', path: '/startup/pitches' },
@@ -13,7 +13,7 @@ export function Sidebar({ role }: { role?: string }) {
       { name: 'Notifications', path: '/notifications' },
     ],
     GOV_OFFICER: [
-      { name: 'Dashboard', path: '/gov' },
+      { name: 'Dashboard', path: '/gov/problems' },
       { name: 'Post Problem', path: '/gov/problems/new' },
       { name: 'My Problems', path: '/gov/problems' },
       { name: 'Review Pitches', path: '/gov/pitches' },
@@ -22,14 +22,14 @@ export function Sidebar({ role }: { role?: string }) {
       { name: 'Notifications', path: '/notifications' },
     ],
     GOV_ADMIN: [
-      { name: 'Dashboard', path: '/admin' },
+      { name: 'Dashboard', path: '/admin/verify' },
       { name: 'Startup Verification', path: '/admin/verify' },
       { name: 'Community Reports', path: '/admin/community' },
       { name: 'Audit Log', path: '/admin/audit-log' },
       { name: 'Notifications', path: '/notifications' },
     ],
     PLATFORM_ADMIN: [
-      { name: 'Overview', path: '/admin' },
+      { name: 'Overview', path: '/admin/audit-log' },
       { name: 'Audit Log', path: '/admin/audit-log' },
       { name: 'Notifications', path: '/notifications' },
     ],
