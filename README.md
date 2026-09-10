@@ -63,10 +63,9 @@ App runs at `http://localhost:3000`.
 
 ## Deployment (Vercel)
 
-The repository includes `vercel.json` configured for instant Vercel deployment:
-1. Import the repository in [Vercel](https://vercel.com/new).
-2. Set Environment Variables (`DATABASE_URL="file:./prisma/dev.db"`, `NEXTAUTH_SECRET="<your-secret>"`, `NEXTAUTH_URL="https://<your-app>.vercel.app"`).
-3. Click **Deploy**. Vercel will automatically build the Next.js app and populate the database seed.
+🚀 **Live Production Application**: [https://setu-theta-ten.vercel.app](https://setu-theta-ten.vercel.app)
+
+The repository includes `vercel.json` configured for automated Vercel CI/CD deployment. Every push to `master` triggers a new production build with automatic schema migration and seed.
 
 ## What is remaining / not fully wired
 
