@@ -5,9 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
-
-
-export async function submitPitch(problemId: string, formData: FormData) {
+async function requireStartupProfile() {
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user as any).role !== "STARTUP") {
     throw new Error("Unauthorized");
@@ -18,6 +16,15 @@ export async function submitPitch(problemId: string, formData: FormData) {
   });
 
   if (!profile) throw new Error("Startup profile not found");
+  return profile;
+}
+
+export async function submitPitch(problemId: string, formData: FormData) {
+  const profile = await requireStartupProfile();
+
+  // Drafts are private and closed problems no longer accept pitches.
+  const problem = await prisma.problem.findUnique({ where: { id: problemId }, select: { status: true } });
+  if (problem?.status !== "PUBLISHED") throw new Error("This problem is not accepting pitches");
 
   const solutionSummary = formData.get("solutionSummary") as string;
   const techReadinessLevel = parseInt(formData.get("trl") as string) || 5;
@@ -40,10 +47,11 @@ export async function submitPitch(problemId: string, formData: FormData) {
 }
 
 export async function updatePitch(pitchId: string, formData: FormData) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "STARTUP") {
-    throw new Error("Unauthorized");
-  }
+  const profile = await requireStartupProfile();
+
+  // Startups may only edit their own pitches.
+  const pitch = await prisma.pitch.findUnique({ where: { id: pitchId }, select: { startupId: true } });
+  if (!pitch || pitch.startupId !== profile.id) throw new Error("Unauthorized");
 
   await prisma.pitch.update({
     where: { id: pitchId },

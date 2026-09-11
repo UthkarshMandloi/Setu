@@ -17,7 +17,7 @@ export async function verifyDocument(extractedText: string, docType: string) {
     };
   }
 
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-2.5-flash" });
   
   const prompt = `
     You are an AI verification assistant for the Indian government's Setu platform.

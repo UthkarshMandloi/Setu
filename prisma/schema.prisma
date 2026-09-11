@@ -77,12 +77,20 @@ model Department {
 
 model Problem {
   id          String         @id @default(cuid())
+  psNumber    Int            @unique @default(autoincrement()) // human-readable PS ID, displayed as PS-0001
   title       String
   description String
   theme       String?
   deadline    DateTime?
   budgetBand  String?
   expectedOutcomes String?
+  scope               String?  // technical & functional requirements, one per line
+  constraints         String?  // one per line
+  targetBeneficiaries String?
+  pilotDurationWeeks  Int?
+  suggestedKpis       Json?    // [{ metric, target, unit, direction }] proposed at posting time
+  originalBrief       String?  // officer's plain-language description before AI drafting
+  aiAssisted          Boolean  @default(false)
   status      String         @default("DRAFT") // DRAFT, PUBLISHED, CLOSED, ARCHIVED
   sourceType  String         @default("OFFICIAL") // OFFICIAL, COMMUNITY
 

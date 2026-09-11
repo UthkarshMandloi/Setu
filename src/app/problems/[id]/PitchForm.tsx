@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { submitPitch, updatePitch } from "./actions";
+import { TRL_LEVELS } from "@/lib/trl";
 
 export default function PitchForm({ problemId, existingPitch }: { problemId: string; existingPitch: any }) {
   const [loading, setLoading] = useState(false);
@@ -37,18 +38,27 @@ export default function PitchForm({ problemId, existingPitch }: { problemId: str
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Technology Readiness Level (1-9)</Label>
-          <Input
-            name="trl"
-            type="number"
-            min={1}
-            max={9}
-            defaultValue={existingPitch?.techReadinessLevel || 5}
-            required
-          />
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor="trl">Technology Readiness Level (TRL)</Label>
+        <select
+          id="trl"
+          name="trl"
+          defaultValue={existingPitch?.techReadinessLevel || 5}
+          required
+          className="h-9 w-full rounded-md border border-input bg-transparent px-2 text-sm shadow-sm"
+        >
+          {TRL_LEVELS.map((t) => (
+            <option key={t.level} value={t.level}>
+              TRL {t.level} — {t.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-slate-500">
+          How mature is your solution today? 1–3 research, 4–6 prototype, 7–9 deployment-ready. Officers see this when comparing pitches.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
         <div className="space-y-2">
           <Label>Team Size & Expertise</Label>
           <Input

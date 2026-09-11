@@ -1,16 +1,11 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-
-
+import { psCode } from "@/lib/problemFields";
 
 export default async function ProblemsPage() {
-  const session = await getServerSession(authOptions);
-  
   const problems = await prisma.problem.findMany({
     where: { status: 'PUBLISHED' },
     include: { department: true },
@@ -30,10 +25,13 @@ export default async function ProblemsPage() {
         {problems.map((problem) => (
           <Card key={problem.id} className="hover:shadow-md transition-shadow">
             <CardHeader>
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-lg">{problem.title}</CardTitle>
+              <div className="flex justify-between items-center gap-2 mb-1">
+                <span className="rounded bg-[#1B3A6B] px-2 py-0.5 font-mono text-xs font-semibold text-white">
+                  {psCode(problem.psNumber)}
+                </span>
                 <Badge variant="outline">{problem.sourceType}</Badge>
               </div>
+              <CardTitle className="text-lg">{problem.title}</CardTitle>
               <CardDescription className="line-clamp-2">{problem.description}</CardDescription>
             </CardHeader>
             <CardContent>
