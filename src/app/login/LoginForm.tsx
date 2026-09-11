@@ -121,9 +121,9 @@ export default function LoginForm() {
           <ul className="space-y-1">
             <li>officer.mh@gov.in (Officer)</li>
             <li>admin.mh@gov.in (Admin)</li>
-            <li>founder1@cropai-tech.com (Startup)</li>
+            <li>founder1@cropaitech.com (Startup)</li>
             <li>founder2@geospatialanalytics.com (Startup)</li>
-            <li>founder3@medlink.com (Startup)</li>
+            <li>founder3@medlinksolutions.com (Startup)</li>
           </ul>
         </div>
       </TabsContent>
