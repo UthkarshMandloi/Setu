@@ -1,92 +1,59 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { calculatePilotScore, calculateROI, getTrustBadge, generateSolutionPassport } from "@/lib/scoring/calculateScore";
+import { requireOfficer } from "@/lib/officer";
+import { generateSolutionPassport } from "@/lib/scoring/calculateScore";
+import { evaluateKpis } from "@/lib/scoring/kpi";
 
-
-
-export async function calculateMetrics(pilotId: string) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || !["GOV_OFFICER", "GOV_ADMIN"].includes((session.user as any).role)) {
-    throw new Error("Unauthorized");
-  }
-
+// Only officers of the pilot's own department may change it (evaluators can view, not act).
+async function loadManagedPilot(pilotId: string) {
+  const officer = await requireOfficer();
   const pilot = await prisma.pilot.findUnique({
     where: { id: pilotId },
-    include: {
-      pitch: {
-        include: { startup: true, problem: true }
-      },
-      kpis: {
-        include: { results: true }
-      },
-      passport: true
-    }
+    include: { kpis: { include: { results: true } }, passport: { select: { id: true } } },
   });
-
-  if (!pilot) throw new Error("Pilot not found");
-
-  const [impactScore, roi, trustBadge] = await Promise.all([
-    calculatePilotScore(pilotId),
-    calculateROI(pilotId),
-    getTrustBadge(await calculatePilotScore(pilotId))
-  ]);
-
-  return {
-    impactScore,
-    roi,
-    trustBadge,
-    hasPassport: !!pilot.passport,
-    passport: pilot.passport,
-    kpis: pilot.kpis?.map(kpi => {
-      const result = (kpi as any).results ? (kpi as any).results[0] : undefined;
-      return {
-        id: kpi.id,
-        metric: kpi.metric,
-        target: kpi.target,
-        unit: kpi.unit,
-        weight: kpi.weight,
-        direction: kpi.direction,
-        actual: result?.actual || 0,
-        achievedPercentage: result?.actual && kpi.target ?
-          (kpi.direction === "HIGHER_IS_BETTER" ?
-            Math.min(100, (result.actual / kpi.target) * 100) :
-            Math.min(100, (kpi.target / result.actual) * 100)
-          ) : 0
-      };
-    }) || []
-  };
+  if (!pilot || pilot.departmentId !== officer.departmentId) throw new Error("Unauthorized");
+  return { officer, pilot };
 }
 
-export async function generatePilotPassport(pilotId: string) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || !["GOV_OFFICER", "GOV_ADMIN"].includes((session.user as any).role)) {
-    throw new Error("Unauthorized");
+export async function generatePilotPassport(
+  pilotId: string,
+  ipStatus: "OPEN" | "PROPRIETARY" = "PROPRIETARY"
+): Promise<{ ok: true; passportId: string } | { ok: false; error: string }> {
+  const { officer, pilot } = await loadManagedPilot(pilotId);
+
+  if (pilot.passport) return { ok: false, error: "A Solution Passport already exists for this pilot." };
+  if (pilot.status !== "COMPLETED") return { ok: false, error: "Passports can only be generated for completed pilots." };
+
+  const { reportedCount, totalCount } = evaluateKpis(pilot.kpis);
+  if (totalCount === 0 || reportedCount < totalCount) {
+    return { ok: false, error: "Every KPI needs a reported result before the passport can be generated." };
   }
 
-  const pilot = await prisma.pilot.findUnique({
-    where: { id: pilotId },
-    include: { passport: true, pitch: true }
+  const passport = await generateSolutionPassport(pilotId, ipStatus === "OPEN" ? "OPEN" : "PROPRIETARY");
+
+  await prisma.auditLog.create({
+    data: {
+      action: "PASSPORT_GENERATED",
+      entityType: "Pilot",
+      entityId: pilotId,
+      actorId: officer.id,
+      details: `Solution Passport ${passport.id} issued (${passport.trustBadge}, impact ${passport.impactScore}, IP ${passport.ipStatus})`,
+    },
   });
 
-  if (!pilot) throw new Error("Pilot not found");
-  if (pilot.passport) throw new Error("Passport already exists");
-
-  const passport = await generateSolutionPassport(pilotId);
   revalidatePath(`/gov/pilots/${pilotId}`);
-  revalidatePath(`/marketplace`);
-
-  return passport;
+  revalidatePath("/gov/pilots");
+  revalidatePath("/marketplace");
+  return { ok: true, passportId: passport.id };
 }
 
 export async function addKPIResult(kpiId: string, actual: number, evidence?: string) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || !["GOV_OFFICER", "GOV_ADMIN"].includes((session.user as any).role)) {
-    throw new Error("Unauthorized");
-  }
+  const officer = await requireOfficer();
+  const kpi = await prisma.kPI.findUnique({ where: { id: kpiId }, include: { pilot: { select: { id: true, departmentId: true } } } });
+  if (!kpi || kpi.pilot.departmentId !== officer.departmentId) throw new Error("Unauthorized");
+  if (!Number.isFinite(actual)) throw new Error("Actual value must be a number");
 
   const result = await prisma.kPIResult.create({
     data: {
@@ -96,6 +63,7 @@ export async function addKPIResult(kpiId: string, actual: number, evidence?: str
     }
   });
 
+  revalidatePath(`/gov/pilots/${kpi.pilot.id}`);
   revalidatePath("/gov/pilots");
   return result;
 }

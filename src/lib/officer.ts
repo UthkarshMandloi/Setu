@@ -17,6 +17,12 @@ export async function getOfficer() {
   });
 }
 
+// ASSUMPTION: GOV_ADMIN acts as the Government Admin/Evaluator from the PRD, so it may VIEW
+// every department's pilots (read-only oversight). Changing pilots stays with the owning department.
+export function canViewDepartment(officer: { role: string; departmentId: string | null }, departmentId: string): boolean {
+  return officer.role === "GOV_ADMIN" || officer.departmentId === departmentId;
+}
+
 export async function requireOfficer() {
   const officer = await getOfficer();
   if (!officer) throw new Error("Unauthorized");
