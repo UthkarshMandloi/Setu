@@ -8,10 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, CheckCircle2, TrendingUp, Unlock, Users } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck, TrendingUp, Unlock, Users } from "lucide-react";
 import TrustBadgeChip from "@/components/TrustBadgeChip";
 import SolutionFinder from "./SolutionFinder";
 import { psCode } from "@/lib/problemFields";
+import { SECTORS } from "@/lib/solutionFields";
 import type { TrustBadge } from "@/lib/scoring/kpi";
 
 const BADGES = ["GREEN", "YELLOW", "RED"];
@@ -20,7 +21,10 @@ const SORTS = ["impact", "roi", "newest", "requests"];
 const FIELD = "h-9 w-full rounded-md border border-input bg-white px-2 text-sm shadow-sm";
 const LABEL = "mb-1 block text-xs font-medium text-slate-600";
 
-type Search = { q?: string; badge?: string; ip?: string; theme?: string; state?: string; minImpact?: string; sort?: string };
+type Search = {
+  q?: string; badge?: string; ip?: string; theme?: string; state?: string; minImpact?: string; sort?: string;
+  sq?: string; sector?: string;
+};
 
 function hrefWith(current: Search, patch: Partial<Search>): string {
   const params = new URLSearchParams();
@@ -37,7 +41,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
     redirect("/login");
   }
 
-  const [passports, officer] = await Promise.all([
+  const [passports, verifiedSolutions, officer] = await Promise.all([
     prisma.solutionPassport.findMany({
       where: { isPublished: true },
       include: {
@@ -51,6 +55,11 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
         marketplaceRequests: { select: { id: true } },
       },
       orderBy: { impactScore: "desc" },
+    }),
+    prisma.startupSolution.findMany({
+      where: { status: "VERIFIED", isListed: true },
+      include: { startup: { select: { companyName: true, sector: true } }, requests: { select: { id: true } } },
+      orderBy: { createdAt: "desc" },
     }),
     getOfficer(),
   ]);
@@ -102,11 +111,23 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
   const avgImpact = passports.length ? passports.reduce((sum, p) => sum + p.impactScore, 0) / passports.length : 0;
 
   const stats = [
-    { icon: CheckCircle2, tone: "text-green-600", value: String(passports.length), label: "Proven solutions" },
+    { icon: CheckCircle2, tone: "text-green-600", value: String(passports.length), label: "Pilot-proven solutions" },
     { icon: TrendingUp, tone: "text-[#D97706]", value: passports.length ? `${avgImpact.toFixed(1)} / 100` : "—", label: "Average impact score" },
     { icon: Users, tone: "text-blue-600", value: String(passports.reduce((sum, p) => sum + p.marketplaceRequests.length, 0)), label: "Reuse requests" },
     { icon: Unlock, tone: "text-[#1B3A6B]", value: String(passports.filter((p) => p.ipStatus === "OPEN").length), label: "Open-IP solutions" },
   ];
+
+  // Startup-submitted solutions: admin-verified, but never piloted through Setu, so they get their
+  // own section rather than being mixed into the KPI-scored passport grid above.
+  const sq = searchParams.sq?.trim().toLowerCase() ?? "";
+  const sector = searchParams.sector ?? "";
+  const sectors = Array.from(new Set(verifiedSolutions.map((s) => s.sector).filter(Boolean))) as string[];
+  const filteredSolutions = verifiedSolutions.filter(
+    (s) =>
+      (!sq || [s.title, s.description, s.problemSolved, s.startup.companyName].some((v) => v.toLowerCase().includes(sq))) &&
+      (!sector || s.sector === sector)
+  );
+  const solutionFiltersActive = !!(sq || sector);
 
   return (
     <div className="space-y-6">
@@ -117,13 +138,15 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {stats.map((s) => (
-          <Card key={s.label} className="border-slate-200 shadow-sm">
+          <Card key={s.label} className="rounded-2xl border-slate-200/80 shadow-gov-card bg-white/95">
             <CardContent className="pt-4">
-              <div className="flex items-center gap-2">
-                <s.icon className={s.tone} size={20} aria-hidden />
-                <div className="text-2xl font-semibold text-slate-900">{s.value}</div>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center shadow-xs">
+                  <s.icon className={s.tone} size={19} aria-hidden />
+                </div>
+                <div className="text-2xl font-bold text-slate-900">{s.value}</div>
               </div>
-              <div className="text-xs font-medium text-slate-500 mt-1">{s.label}</div>
+              <div className="text-xs font-semibold text-slate-500 mt-2">{s.label}</div>
             </CardContent>
           </Card>
         ))}
@@ -216,35 +239,35 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map((passport) => (
-              <Card key={passport.id} className="flex flex-col border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
+              <Card key={passport.id} className="flex flex-col rounded-3xl border border-slate-200/80 shadow-gov-card hover:shadow-gov-card-hover transition-all duration-300 overflow-hidden bg-white">
+                <CardHeader className="pb-3 pt-5 px-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="rounded bg-[#1B3A6B] px-2 py-0.5 font-mono text-xs font-semibold text-white">
+                    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#1B3A6B] border border-slate-200">
                       {psCode(passport.pilot.pitch.problem.psNumber)}
                     </span>
                     <TrustBadgeChip badge={passport.trustBadge as TrustBadge} />
                   </div>
-                  <CardTitle className="text-lg text-[#1B3A6B]">{passport.title}</CardTitle>
-                  <CardDescription className="text-sm">
+                  <CardTitle className="text-lg font-bold text-slate-900 mt-1">{passport.title}</CardTitle>
+                  <CardDescription className="text-xs font-medium text-slate-500">
                     {passport.startup.companyName} • {passport.startup.sector}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex flex-1 flex-col space-y-3">
-                  <p className="text-sm text-slate-600 line-clamp-2">{passport.summary}</p>
+                <CardContent className="flex flex-1 flex-col space-y-3 px-5 pb-5 pt-0">
+                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{passport.summary}</p>
 
                   <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="bg-slate-50 p-2 rounded">
-                      <span className="text-slate-500">Impact score</span>
-                      <div className="font-semibold text-lg text-slate-900">
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Impact score</span>
+                      <div className="font-bold text-lg text-slate-900 mt-0.5">
                         {passport.impactScore}
-                        <span className="text-xs font-normal text-slate-500"> / 100</span>
+                        <span className="text-xs font-normal text-slate-400"> / 100</span>
                       </div>
                     </div>
-                    <div className="bg-slate-50 p-2 rounded">
-                      <span className="text-slate-500">ROI</span>
-                      <div className="font-semibold text-lg text-slate-900">
+                    <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                      <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Verified ROI</span>
+                      <div className="font-bold text-lg text-slate-900 mt-0.5">
                         {passport.roiPercent !== null
                           ? `${passport.roiPercent >= 0 ? "+" : "−"}${Math.abs(passport.roiPercent).toFixed(0)}%`
                           : "—"}
@@ -253,22 +276,91 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs rounded-full">
                       {passport.ipStatus === "OPEN" ? "Open IP" : "Proprietary"}
                     </Badge>
-                    <span>
+                    <span className="text-xs text-slate-500">
                       Piloted by {passport.pilot.department.name}
                       {passport.pilot.department.state ? `, ${passport.pilot.department.state}` : ""}
                     </span>
                   </div>
 
                   {passport.marketplaceRequests.length > 0 && (
-                    <div className="text-xs text-blue-700">
+                    <div className="text-xs text-blue-700 font-medium">
                       {passport.marketplaceRequests.length} reuse request{passport.marketplaceRequests.length === 1 ? "" : "s"}
                     </div>
                   )}
 
                   <Link href={`/marketplace/${passport.id}`} className="mt-auto pt-2">
+                    <Button className="w-full rounded-full bg-[#1B3A6B] hover:bg-[#142A4F] text-xs font-semibold">
+                      View Details <ArrowRight size={14} className="ml-1" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4 border-t pt-6">
+        <div>
+          <h2 className="text-xl font-semibold text-[#1B3A6B]">Startup-Submitted Solutions</h2>
+          <p className="text-sm text-slate-500">
+            Solutions startups have already built and listed directly, verified by a platform admin — not yet
+            measured through a Setu pilot, so no impact score or trust badge yet.
+          </p>
+        </div>
+
+        <form method="get" className="grid grid-cols-1 gap-3 rounded-md border bg-white p-4 shadow-sm md:grid-cols-3">
+          <div className="md:col-span-2">
+            <label className={LABEL} htmlFor="sq">Search</label>
+            <Input id="sq" name="sq" defaultValue={sq} placeholder="Solution, startup, or problem it solves" className="bg-white" />
+          </div>
+          <div>
+            <label className={LABEL} htmlFor="sector">Sector</label>
+            <select id="sector" name="sector" defaultValue={sector} className={FIELD}>
+              <option value="">Any sector</option>
+              {(sectors.length ? sectors : SECTORS).map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-end gap-2 md:col-span-3">
+            <Button type="submit" size="sm" className="bg-[#1B3A6B] hover:bg-[#142A4F]">Apply filters</Button>
+            {solutionFiltersActive && (
+              <Link href="/marketplace">
+                <Button type="button" size="sm" variant="ghost">Clear</Button>
+              </Link>
+            )}
+          </div>
+        </form>
+
+        {filteredSolutions.length === 0 ? (
+          <Card className="border-slate-200 shadow-sm">
+            <CardContent className="py-10 text-center text-slate-500">
+              {verifiedSolutions.length === 0 ? "No startup-submitted solutions listed yet." : "No solutions match these filters."}
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredSolutions.map((s) => (
+              <Card key={s.id} className="flex flex-col border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Badge className="border-0 bg-blue-100 text-blue-800 gap-1"><ShieldCheck size={12} /> Platform Verified</Badge>
+                    {s.sector && <Badge variant="outline" className="text-xs">{s.sector}</Badge>}
+                  </div>
+                  <CardTitle className="text-lg text-[#1B3A6B]">{s.title}</CardTitle>
+                  <CardDescription className="text-sm">{s.startup.companyName}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-1 flex-col space-y-3">
+                  <p className="text-sm text-slate-600 line-clamp-2">{s.description}</p>
+                  <p className="text-xs text-slate-500 line-clamp-2"><span className="font-medium text-slate-600">Solves:</span> {s.problemSolved}</p>
+                  {s.requests.length > 0 && (
+                    <div className="text-xs text-blue-700">{s.requests.length} department{s.requests.length === 1 ? "" : "s"} interested</div>
+                  )}
+                  <Link href={`/marketplace/solutions/${s.id}`} className="mt-auto pt-2">
                     <Button className="w-full bg-[#1B3A6B] hover:bg-[#142A4F]">
                       View Details <ArrowRight size={14} className="ml-1" />
                     </Button>

@@ -24,6 +24,7 @@ model User {
   authoredProblems   Problem[]
   auditLogs          AuditLog[]
   notifications      Notification[]
+  reviewedSolutions  StartupSolution[] @relation("SolutionReviewer")
 }
 
 model StartupProfile {
@@ -45,6 +46,7 @@ model StartupProfile {
   documents        Document[]
   pitches          Pitch[]
   passports        SolutionPassport[]
+  solutions        StartupSolution[]
 }
 
 model Document {
@@ -73,6 +75,7 @@ model Department {
   problems           Problem[]
   pilots             Pilot[]
   marketplaceRequests MarketplaceRequest[]
+  solutionRequests   StartupSolutionRequest[]
 }
 
 model Problem {
@@ -219,6 +222,49 @@ model MarketplaceRequest {
 
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+}
+
+// A solution a startup has already built (not piloted through Setu, so it carries no KPI-measured
+// trust badge) that it wants discoverable on the marketplace. Admin-verified, not KPI-verified —
+// kept as its own model rather than a SolutionPassport variant so the two trust signals are never
+// conflated: passports = real pilot results, StartupSolution = admin-checked self-declaration.
+model StartupSolution {
+  id              String    @id @default(cuid())
+  startupId       String
+  startup         StartupProfile @relation(fields: [startupId], references: [id], onDelete: Cascade)
+
+  title           String
+  sector          String?
+  description     String    // what the solution does
+  problemSolved   String    // the generic problem / pain point it addresses
+  keyFeatures     String?   // one per line
+  deploymentProof String?   // existing deployments / case studies, one per line
+  evidenceUrl     String?   // optional link: demo video, case study, spec sheet
+
+  status          String    @default("DRAFT") // DRAFT, PENDING, VERIFIED, REJECTED
+  isListed        Boolean   @default(true)    // startup can hide from marketplace without deleting
+  reviewNotes     String?
+  reviewedById    String?
+  reviewedBy      User?     @relation("SolutionReviewer", fields: [reviewedById], references: [id])
+  reviewedAt      DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  requests        StartupSolutionRequest[]
+}
+
+model StartupSolutionRequest {
+  id           String          @id @default(cuid())
+  solutionId   String
+  solution     StartupSolution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+  departmentId String
+  department   Department      @relation(fields: [departmentId], references: [id])
+  status       String          @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  notes        String?
+
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 }
 
 model UnregisteredProblem {

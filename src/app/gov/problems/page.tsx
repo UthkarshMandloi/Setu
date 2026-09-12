@@ -38,14 +38,14 @@ export default async function GovProblemsPage() {
           </p>
         </div>
         <Link href="/gov/problems/new">
-          <Button className="bg-[#1B3A6B]">
-            <Plus size={16} className="mr-2" />
+          <Button className="bg-[#1B3A6B] hover:bg-[#142A4F] text-white rounded-full px-5">
+            <Plus size={16} className="mr-1.5" />
             Post New Problem
           </Button>
         </Link>
       </div>
 
-      <div className="bg-white border rounded-md shadow-sm">
+      <div className="bg-white border border-slate-200/80 rounded-3xl shadow-gov-card overflow-hidden">
         <div className="grid divide-y">
           {problems.length === 0 ? (
             <div className="p-8 text-center text-slate-500">

@@ -33,6 +33,9 @@ yarn-error.log*
 *.db
 *.db-journal
 
+# KPI evidence uploads (local prototype storage, served via /api/files)
+/uploads
+
 # vercel
 .vercel
 
