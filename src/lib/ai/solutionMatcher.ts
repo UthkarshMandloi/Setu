@@ -39,7 +39,7 @@ export type MatchResult = { understanding: string; matches: SolutionMatch[]; sim
 const SHORTLIST_SIZE = 12;
 const MIN_SIMILARITY = 30;
 
-const SYSTEM_PROMPT = `You are the Solution-Reuse Advisor on Setu, a Government of Maharashtra platform. Government departments pilot startup solutions; each successful pilot becomes a "Solution Passport" with measured KPI results that other departments can adopt without a fresh procurement round.
+const SYSTEM_PROMPT = `You are the Solution-Reuse Advisor on PilotSetu, a Government of Maharashtra platform. Government departments pilot startup solutions; each successful pilot becomes a "Solution Passport" with measured KPI results that other departments can adopt without a fresh procurement round.
 
 A user describes a NEW problem (possibly in Hindi, Marathi or mixed English). You receive candidate passports. For each candidate, judge how well that proven solution could solve the new problem.
 

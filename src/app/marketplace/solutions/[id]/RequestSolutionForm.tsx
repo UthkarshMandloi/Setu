@@ -51,7 +51,7 @@ export default function RequestSolutionForm({ solutionId }: { solutionId: string
     <Card className="border-slate-200 shadow-sm">
       <CardHeader>
         <CardTitle className="text-lg">Request a Pilot</CardTitle>
-        <p className="text-sm text-slate-500">This solution hasn&apos;t been piloted through Setu yet — requesting starts a conversation with the startup about a pilot.</p>
+        <p className="text-sm text-slate-500">This solution hasn&apos;t been piloted through PilotSetu yet — requesting starts a conversation with the startup about a pilot.</p>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">

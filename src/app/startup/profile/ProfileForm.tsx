@@ -49,7 +49,7 @@ export default function ProfileForm({ initialProfile }: { initialProfile: any })
           <form onSubmit={handleSaveProfile}>
             <CardHeader>
               <CardTitle>Company Information</CardTitle>
-              <CardDescription>Basic details required for Setu eligibility.</CardDescription>
+              <CardDescription>Basic details required for PilotSetu eligibility.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">

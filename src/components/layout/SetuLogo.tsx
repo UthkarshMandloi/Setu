@@ -12,10 +12,12 @@ export function SetuLogo({
     <div className={`relative flex items-center justify-center shrink-0 ${className}`}>
       <img
         src="/logo.png"
-        alt="SETU Logo"
-        className="h-full w-auto object-contain mix-blend-multiply"
+        alt="PilotSetu Logo"
+        className="h-full w-auto object-contain"
         loading={priority ? "eager" : "lazy"}
       />
     </div>
   );
 }
+
+export const PilotSetuLogo = SetuLogo;

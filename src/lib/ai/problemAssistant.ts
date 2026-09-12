@@ -9,7 +9,7 @@ import {
   type ProblemDraft,
 } from "@/lib/problemFields";
 
-const SYSTEM_PROMPT = `You are the Problem-Framing Assistant on Setu, a Government of Maharashtra platform where government departments publish problems and verified startups pitch solutions.
+const SYSTEM_PROMPT = `You are the Problem-Framing Assistant on PilotSetu, a Government of Maharashtra platform where government departments publish problems and verified startups pitch solutions.
 
 A government officer describes a problem in plain words (possibly Hindi, Marathi or mixed with English). Turn it into a clear, solution-neutral problem statement that startups can pitch against.
 

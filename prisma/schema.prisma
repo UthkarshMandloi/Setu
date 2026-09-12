@@ -224,7 +224,7 @@ model MarketplaceRequest {
   updatedAt    DateTime         @updatedAt
 }
 
-// A solution a startup has already built (not piloted through Setu, so it carries no KPI-measured
+// A solution a startup has already built (not piloted through PilotSetu, so it carries no KPI-measured
 // trust badge) that it wants discoverable on the marketplace. Admin-verified, not KPI-verified —
 // kept as its own model rather than a SolutionPassport variant so the two trust signals are never
 // conflated: passports = real pilot results, StartupSolution = admin-checked self-declaration.

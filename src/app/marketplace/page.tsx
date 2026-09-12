@@ -117,7 +117,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
     { icon: Unlock, tone: "text-[#1B3A6B]", value: String(passports.filter((p) => p.ipStatus === "OPEN").length), label: "Open-IP solutions" },
   ];
 
-  // Startup-submitted solutions: admin-verified, but never piloted through Setu, so they get their
+  // Startup-submitted solutions: admin-verified, but never piloted through PilotSetu, so they get their
   // own section rather than being mixed into the KPI-scored passport grid above.
   const sq = searchParams.sq?.trim().toLowerCase() ?? "";
   const sector = searchParams.sector ?? "";
@@ -308,7 +308,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
           <h2 className="text-xl font-semibold text-[#1B3A6B]">Startup-Submitted Solutions</h2>
           <p className="text-sm text-slate-500">
             Solutions startups have already built and listed directly, verified by a platform admin — not yet
-            measured through a Setu pilot, so no impact score or trust badge yet.
+            measured through a PilotSetu pilot, so no impact score or trust badge yet.
           </p>
         </div>
 

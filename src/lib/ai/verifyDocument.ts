@@ -20,7 +20,7 @@ export async function verifyDocument(extractedText: string, docType: string) {
   const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || "gemini-2.5-flash" });
   
   const prompt = `
-    You are an AI verification assistant for the Indian government's Setu platform.
+    You are an AI verification assistant for the Indian government's PilotSetu platform.
     Analyze the following extracted text from a document of type: ${docType}.
     Extract the relevant fields you can find (e.g. CIN, dates, company name, PAN).
     Identify any missing mandatory fields for this type of document.

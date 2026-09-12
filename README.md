@@ -1,4 +1,4 @@
-# Setu — SIH 2026 · PS SIH26136 (Govt of Maharashtra)
+# PilotSetu — SIH 2026 · PS SIH26136 (Govt of Maharashtra)
 
 Government-Startup Innovation Procurement Exchange prototype. Government departments post problems; verified startups pitch solutions; pilots run against agreed KPIs; AI drafts legal/pilot documents; KPI results generate ROI, colour-coded trust badges, and reusable Solution Passports for a marketplace adoption flow.
 

@@ -38,7 +38,7 @@ export function Navbar({ user }: { user: any }) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-[72px] gap-4">
-        {/* Brand: Official SETU Logo */}
+        {/* Brand: Official PilotSetu Logo */}
         <Link href="/" className="flex items-center gap-3.5 group shrink-0">
           <SetuLogo className="h-11 md:h-12 w-auto transition-transform group-hover:scale-105 duration-200" priority />
           <div className="hidden lg:flex flex-col border-l border-slate-200 pl-3.5">

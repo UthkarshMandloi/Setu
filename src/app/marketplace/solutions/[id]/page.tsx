@@ -31,7 +31,7 @@ export default async function SolutionDetailPage({ params }: { params: { id: str
         <div className="flex flex-wrap items-center gap-2 mb-2">
           <Badge className="border-0 bg-blue-100 text-blue-800 gap-1"><ShieldCheck size={12} /> Platform Verified</Badge>
           {solution.sector && <Badge variant="outline">{solution.sector}</Badge>}
-          <Badge variant="outline" className="text-slate-500">Not yet piloted through Setu</Badge>
+          <Badge variant="outline" className="text-slate-500">Not yet piloted through PilotSetu</Badge>
         </div>
         <h1 className="text-3xl font-bold tracking-tight text-[#1B3A6B]">{solution.title}</h1>
         <p className="text-slate-500 mt-1">{solution.startup.companyName} • {solution.startup.sector}</p>
@@ -89,7 +89,7 @@ export default async function SolutionDetailPage({ params }: { params: { id: str
             <CardContent className="space-y-2 text-sm text-slate-600">
               <p>
                 This solution was <span className="font-medium text-slate-800">verified by a platform admin</span>, not measured through
-                a Setu pilot. It has no impact score, ROI or trust badge yet — those appear once it completes a pilot.
+                a PilotSetu pilot. It has no impact score, ROI or trust badge yet — those appear once it completes a pilot.
               </p>
             </CardContent>
           </Card>

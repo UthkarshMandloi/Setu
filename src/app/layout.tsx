@@ -9,7 +9,7 @@ import { getNavCounts } from "@/lib/navCounts";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Setu - Innovation Exchange",
+  title: "PilotSetu - Innovation Exchange",
   description: "Government-Startup Procurement Exchange",
 };
 

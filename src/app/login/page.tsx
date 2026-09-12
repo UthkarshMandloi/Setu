@@ -31,7 +31,7 @@ export default async function LoginPage() {
             <SetuLogo className="h-16 w-auto" priority />
           </div>
           <h1 className="text-2xl font-black tracking-tight text-[#1B3A6B]">
-            Sign in to SETU
+            Sign in to PilotSetu
           </h1>
           <p className="text-xs font-semibold text-slate-400 mt-1">
             Government of India • Innovation Exchange Portal

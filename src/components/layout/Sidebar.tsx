@@ -237,7 +237,7 @@ export function Sidebar({
       <div className="mt-auto pt-6 px-3 border-t border-slate-100">
         <div className="p-3 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/40 border border-slate-150/80 text-xs text-slate-500">
           <p className="font-semibold text-slate-700">Gov-Tech Helpdesk</p>
-          <p className="text-[11px] mt-0.5 text-slate-400">Toll Free: 1800-11-SETU</p>
+          <p className="text-[11px] mt-0.5 text-slate-400">Toll Free: 1800-11-PILOTSETU</p>
         </div>
       </div>
     </aside>
