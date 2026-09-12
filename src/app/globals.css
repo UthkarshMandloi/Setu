@@ -95,3 +95,20 @@
   box-shadow: 0 2px 6px rgba(139, 183, 110, 0.3);
 }
 
+/* Google Website Translator (Hindi/Marathi via the navbar language switcher) — hide every bit of
+   Google's own UI; we drive it entirely with our own pill buttons in LanguageSwitcher.tsx. */
+#google_translate_element,
+.goog-te-banner-frame.skiptranslate,
+.goog-te-gadget-icon,
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+body {
+  top: 0px !important;
+}
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+

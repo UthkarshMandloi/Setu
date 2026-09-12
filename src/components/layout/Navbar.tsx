@@ -4,6 +4,7 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { Search, Bell, LogOut, User } from "lucide-react";
 import { SetuLogo } from "./SetuLogo";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -73,6 +74,8 @@ export function Navbar({ user }: { user: any }) {
 
         {/* Right Actions & User Profile */}
         <div className="flex items-center gap-3 shrink-0">
+          <LanguageSwitcher />
+
           {/* Notification Quick Bell */}
           <Link
             href="/notifications"
