@@ -125,6 +125,36 @@ const RELATIONS: Record<string, Record<string, RelationDef>> = {
 const cache: Record<string, { docs: any[]; lastFetched: number }> = {};
 const CACHE_TTL_MS = 3000; // 3 seconds TTL
 
+const DATE_FIELDS = new Set([
+  "createdAt",
+  "updatedAt",
+  "deadline",
+  "startDate",
+  "endDate",
+  "reviewedAt",
+  "emailVerified"
+]);
+
+function normalizeDoc(raw: any): any {
+  if (!raw || typeof raw !== "object") return raw;
+  const doc: Record<string, any> = { ...raw };
+  for (const [field, val] of Object.entries(doc)) {
+    if (val !== undefined && val !== null && DATE_FIELDS.has(field)) {
+      if (val instanceof Date) {
+        // already Date
+      } else if (typeof val === "object" && typeof (val as any).toDate === "function") {
+        doc[field] = (val as any).toDate();
+      } else {
+        const parsed = new Date(val);
+        if (!isNaN(parsed.getTime())) {
+          doc[field] = parsed;
+        }
+      }
+    }
+  }
+  return doc;
+}
+
 function generateId(): string {
   return "c" + crypto.randomBytes(12).toString("hex");
 }
@@ -139,7 +169,7 @@ async function getCollectionDocs(collectionName: string, forceFresh = false): Pr
   const snap = await getDocs(colRef);
   const docs: any[] = [];
   snap.forEach((d) => {
-    docs.push({ ...d.data(), id: d.id });
+    docs.push(normalizeDoc({ ...d.data(), id: d.id }));
   });
 
   cache[collectionName] = { docs, lastFetched: now };
@@ -148,14 +178,15 @@ async function getCollectionDocs(collectionName: string, forceFresh = false): Pr
 
 function updateCacheDoc(collectionName: string, item: any, isDelete = false) {
   if (!cache[collectionName]) return;
+  const normalized = normalizeDoc(item);
   if (isDelete) {
-    cache[collectionName].docs = cache[collectionName].docs.filter((d) => d.id !== item.id);
+    cache[collectionName].docs = cache[collectionName].docs.filter((d) => d.id !== normalized.id);
   } else {
-    const idx = cache[collectionName].docs.findIndex((d) => d.id === item.id);
+    const idx = cache[collectionName].docs.findIndex((d) => d.id === normalized.id);
     if (idx >= 0) {
-      cache[collectionName].docs[idx] = { ...cache[collectionName].docs[idx], ...item };
+      cache[collectionName].docs[idx] = { ...cache[collectionName].docs[idx], ...normalized };
     } else {
-      cache[collectionName].docs.push(item);
+      cache[collectionName].docs.push(normalized);
     }
   }
 }
@@ -226,13 +257,21 @@ function matchesWhere(item: any, whereClause: any, modelName: string): boolean {
         const needle = String((value as any).contains).toLowerCase();
         if (!String(itemVal || "").toLowerCase().includes(needle)) return false;
       } else if ("gte" in value) {
-        if (itemVal < (value as any).gte) return false;
+        const itemValNum = itemVal instanceof Date ? itemVal.getTime() : itemVal;
+        const gteValNum = (value as any).gte instanceof Date ? (value as any).gte.getTime() : (value as any).gte;
+        if (itemValNum < gteValNum) return false;
       } else if ("lte" in value) {
-        if (itemVal > (value as any).lte) return false;
+        const itemValNum = itemVal instanceof Date ? itemVal.getTime() : itemVal;
+        const lteValNum = (value as any).lte instanceof Date ? (value as any).lte.getTime() : (value as any).lte;
+        if (itemValNum > lteValNum) return false;
       } else if ("gt" in value) {
-        if (itemVal <= (value as any).gt) return false;
+        const itemValNum = itemVal instanceof Date ? itemVal.getTime() : itemVal;
+        const gtValNum = (value as any).gt instanceof Date ? (value as any).gt.getTime() : (value as any).gt;
+        if (itemValNum <= gtValNum) return false;
       } else if ("lt" in value) {
-        if (itemVal >= (value as any).lt) return false;
+        const itemValNum = itemVal instanceof Date ? itemVal.getTime() : itemVal;
+        const ltValNum = (value as any).lt instanceof Date ? (value as any).lt.getTime() : (value as any).lt;
+        if (itemValNum >= ltValNum) return false;
       }
     } else {
       if (itemVal !== value) return false;
@@ -251,8 +290,10 @@ function sortDocs(docs: any[], orderBy: any): any[] {
   return [...docs].sort((a, b) => {
     for (const rule of orderRules) {
       for (const [field, direction] of Object.entries(rule)) {
-        const valA = a[field];
-        const valB = b[field];
+        const rawA = a[field];
+        const rawB = b[field];
+        const valA = rawA instanceof Date ? rawA.getTime() : rawA;
+        const valB = rawB instanceof Date ? rawB.getTime() : rawB;
         const dir = String(direction).toLowerCase() === "desc" ? -1 : 1;
 
         if (valA === undefined || valA === null) return 1 * dir;

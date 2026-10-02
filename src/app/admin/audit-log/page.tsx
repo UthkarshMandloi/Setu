@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Activity, CheckCircle, FileText, XCircle } from "lucide-react";
-import type { Prisma } from "@prisma/client";
 import { humanise } from "@/lib/format";
 
 const FIELD = "h-9 w-full rounded-md border border-input bg-white px-2 text-sm shadow-sm";
@@ -57,7 +56,7 @@ export default async function AuditLogPage({ searchParams }: { searchParams: Sea
     prisma.auditLog.findMany({ distinct: ["entityType"], select: { entityType: true }, orderBy: { entityType: "asc" } }),
   ]);
 
-  const where: Prisma.AuditLogWhereInput = {
+  const where: any = {
     ...(action ? { action } : {}),
     ...(entityType ? { entityType } : {}),
     ...(from || to ? { createdAt: { ...(from ? { gte: from } : {}), ...(to ? { lte: to } : {}) } } : {}),

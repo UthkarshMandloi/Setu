@@ -1,4 +1,3 @@
-import type { Prisma } from "@prisma/client";
 import type { KpiSuggestion } from "@/lib/problemFields";
 
 // Officer-entered problem fields, shared by the create and edit flows.

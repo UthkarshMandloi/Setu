@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CheckCircle, XCircle } from "lucide-react";
-import type { Prisma } from "@prisma/client";
 
 const STATUSES = ["PENDING", "ADOPTED", "REJECTED"];
 const SORTS = ["newest", "oldest"];

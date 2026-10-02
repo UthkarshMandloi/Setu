@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getOfficer } from "@/lib/officer";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +20,7 @@ const STATUS_TONE: Record<string, string> = {
   REJECTED: "bg-red-100 text-red-800",
 };
 
-const SORTS: Record<string, Prisma.PitchOrderByWithRelationInput[]> = {
+const SORTS: Record<string, any[]> = {
   newest: [{ createdAt: "desc" }],
   trl: [{ techReadinessLevel: "desc" }, { createdAt: "desc" }],
   eligibility: [{ startup: { eligibilityScore: "desc" } }, { createdAt: "desc" }],
@@ -30,9 +29,9 @@ const SORTS: Record<string, Prisma.PitchOrderByWithRelationInput[]> = {
 const pitchInclude = {
   problem: { select: { id: true, title: true, psNumber: true, status: true } },
   startup: { select: { companyName: true, sector: true, verificationStatus: true, eligibilityScore: true } },
-} satisfies Prisma.PitchInclude;
+};
 
-type PitchWithRelations = Prisma.PitchGetPayload<{ include: typeof pitchInclude }>;
+type PitchWithRelations = any;
 
 type Search = {
   q?: string;
@@ -73,9 +72,9 @@ export default async function PitchReviewPage({ searchParams }: { searchParams: 
 
   // Officers only ever see pitches for their own department's problems.
   const departmentId = officer.departmentId ?? "__none__";
-  const scope: Prisma.PitchWhereInput = { problem: { departmentId } };
+  const scope: any = { problem: { departmentId } };
 
-  const filters: Prisma.PitchWhereInput[] = [];
+  const filters: any[] = [];
   if (q) {
     const psMatch = q.match(/^ps-?0*(\d+)$/i);
     filters.push({

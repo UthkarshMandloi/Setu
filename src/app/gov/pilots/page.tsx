@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getOfficer } from "@/lib/officer";
 import { Badge } from "@/components/ui/badge";
@@ -54,7 +53,7 @@ export default async function PilotListPage({ searchParams }: { searchParams: Se
   const sort = SORTS.includes(searchParams.sort ?? "") ? searchParams.sort! : "newest";
   const dept = isEvaluator ? searchParams.dept ?? "" : "";
 
-  const scope: Prisma.PilotWhereInput = isEvaluator
+  const scope: any = isEvaluator
     ? dept ? { departmentId: dept } : {}
     : { departmentId: officer.departmentId ?? "__none__" };
 
