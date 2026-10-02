@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import type { KpiSuggestion } from "@/lib/problemFields";
 
 // Officer-entered problem fields, shared by the create and edit flows.
@@ -55,7 +55,7 @@ export function parseProblemInput(input: ProblemInput) {
       scope: optional(input.scope),
       constraints: optional(input.constraints),
       targetBeneficiaries: optional(input.targetBeneficiaries),
-      suggestedKpis: kpis.length ? kpis : Prisma.DbNull,
+      suggestedKpis: kpis.length ? (kpis as any) : null,
       originalBrief: optional(input.originalBrief),
       aiAssisted: !!input.aiAssisted,
     },

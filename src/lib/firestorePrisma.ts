@@ -266,6 +266,23 @@ function sortDocs(docs: any[], orderBy: any): any[] {
   });
 }
 
+async function computeCount(item: any, countConfig: any, modelName: string): Promise<Record<string, number>> {
+  const conf = countConfig?.select || countConfig || {};
+  const res: Record<string, number> = {};
+  for (const [relKey, enabled] of Object.entries(conf)) {
+    if (!enabled) continue;
+    const relation = RELATIONS[modelName]?.[relKey];
+    if (relation) {
+      const targetCol = MODEL_TO_COLLECTION[relation.model];
+      const targetDocs = await getCollectionDocs(targetCol);
+      res[relKey] = targetDocs.filter((t) => t[relation.foreignKey] === item.id).length;
+    } else {
+      res[relKey] = 0;
+    }
+  }
+  return res;
+}
+
 // Apply includes / joins
 async function applyIncludes(items: any[], include: any, modelName: string): Promise<any[]> {
   if (!include || Object.keys(include).length === 0) return items;
@@ -276,6 +293,11 @@ async function applyIncludes(items: any[], include: any, modelName: string): Pro
 
     for (const [relKey, relConfig] of Object.entries(include)) {
       if (!relConfig) continue;
+
+      if (relKey === "_count") {
+        itemCopy._count = await computeCount(itemCopy, relConfig, modelName);
+        continue;
+      }
 
       const relation = RELATIONS[modelName]?.[relKey];
       if (!relation) continue;
@@ -294,7 +316,7 @@ async function applyIncludes(items: any[], include: any, modelName: string): Pro
             [enriched] = await applyIncludes([enriched], config.include, relation.model);
           }
           if (config.select) {
-            enriched = applySelect([enriched], config.select)[0];
+            enriched = (await applySelect([enriched], config.select, relation.model))[0];
           }
           itemCopy[relKey] = enriched;
         } else {
@@ -319,7 +341,7 @@ async function applyIncludes(items: any[], include: any, modelName: string): Pro
             targets = await applyIncludes(targets, config.include, relation.model);
           }
           if (config.select) {
-            targets = applySelect(targets, config.select);
+            targets = await applySelect(targets, config.select, relation.model);
           }
         }
 
@@ -333,18 +355,42 @@ async function applyIncludes(items: any[], include: any, modelName: string): Pro
 }
 
 // Apply select projections
-function applySelect(items: any[], select: any): any[] {
+async function applySelect(items: any[], select: any, modelName: string): Promise<any[]> {
   if (!select) return items;
 
-  return items.map((item) => {
+  const result = [];
+  for (const item of items) {
     const projected: Record<string, any> = {};
     for (const [key, val] of Object.entries(select)) {
       if (val === true) {
         projected[key] = item[key];
+      } else if (key === "_count") {
+        projected._count = await computeCount(item, val, modelName);
+      } else if (typeof val === "object" && val !== null) {
+        const relation = RELATIONS[modelName]?.[key];
+        if (relation) {
+          const targetCol = MODEL_TO_COLLECTION[relation.model];
+          const targetDocs = await getCollectionDocs(targetCol);
+          if (relation.type === "one") {
+            const localVal = relation.localKey ? item[relation.localKey] : item.id;
+            let target = targetDocs.find((t) => t[relation.foreignKey] === localVal) || null;
+            if (target && (val as any).select) {
+              target = (await applySelect([target], (val as any).select, relation.model))[0];
+            }
+            projected[key] = target;
+          } else {
+            let targets = targetDocs.filter((t) => t[relation.foreignKey] === item.id);
+            if ((val as any).select) {
+              targets = await applySelect(targets, (val as any).select, relation.model);
+            }
+            projected[key] = targets;
+          }
+        }
       }
     }
-    return projected;
-  });
+    result.push(projected);
+  }
+  return result;
 }
 
 // Create a Model Delegate
@@ -402,7 +448,7 @@ function createModelDelegate(modelName: string) {
       }
 
       if (args?.select) {
-        docs = applySelect(docs, args.select);
+        docs = await applySelect(docs, args.select, modelName);
       }
 
       return docs;
